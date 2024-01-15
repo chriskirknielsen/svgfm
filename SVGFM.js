@@ -1,3 +1,10 @@
+/**
+ * TODO
+ * - Save the graph config so it can be restored (see `this.storedGraph = nodeGraph` inside the `getActiveFilterMarkup` method)
+ * - Create a list of recipes that can be loaded into the filter maker
+ * - Ensure attributes that are conditionally hidden do not appear in the final code
+ */
+
 const svgNS = 'http://www.w3.org/2000/svg'; // I'm lazy
 const fePrimRef = '<filter-primitive-reference>';
 
@@ -172,7 +179,7 @@ function getClickOffset(e, target) {
 	const eventX = e.clientX;
 	const eventY = e.clientY;
 
-	// If this is from a tile that scrolls, compensate for its scroll position
+	// If this is from an element that scrolls, compensate for its scroll position
 	const scrollX = target.closest('.app-sidebar-inner')?.scrollLeft || 0;
 	const scrollY = target.closest('.app-sidebar-inner')?.scrollTop || 0;
 
@@ -1822,7 +1829,11 @@ class SVGFM {
 							e.preventDefault();
 
 							if (data.type === 'template') {
-								nodeTile = this.addNodeTile({ ref: data.ref, x: e.clientX - offset.x, y: e.clientY - offset.y });
+								nodeTile = this.addNodeTile({
+									ref: data.ref,
+									x: e.clientX - offset.x + this.dropTarget.scrollLeft,
+									y: e.clientY - offset.y + this.dropTarget.scrollTop,
+								});
 								this.graph.append(nodeTile);
 							} else if (data.type === 'tile') {
 								nodeTile = target;
