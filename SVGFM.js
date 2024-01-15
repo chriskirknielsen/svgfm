@@ -8,10 +8,6 @@ const fePrimRef = '<filter-primitive-reference>';
  */
 
 /**
- * @typedef {string|string[]} ObjectPath Path of keys for an object, e.g. `['home','title']` or `'home.title'`.
- */
-
-/**
  * Dirty little helper to create a new element with attributes in a single call.
  * @param {string} tag Element node name to create.
  * @param {object} attrs Attributes to assign to the created element.
@@ -391,36 +387,6 @@ function namedColorToHex(name = null) {
  */
 function trueType(val) {
 	return Object.prototype.toString.call(val).slice(8, -1).toLowerCase();
-}
-
-/**
- * Get the value of an object's nested properties.
- * @param {object} obj Object to crawl.
- * @param {ObjectPath} keys Object path to retrieve.
- * @returns {any|undefined} The value at the provided path in the object, or `undefined` if the path is invalid.
- */
-function getDeep(obj, keys) {
-	if (!obj || trueType(obj) !== 'object') {
-		throw `The provided obj is not an object.`;
-	}
-	if (typeof keys === 'string') {
-		keys = keys.split('.').map((key) => key.trim());
-	}
-	if (keys.length === 0) {
-		return undefined;
-	}
-
-	while (keys.length > 0) {
-		const key = keys.shift();
-		if (!obj.hasOwnProperty(key)) {
-			return undefined;
-		}
-		obj = obj[key];
-		if (typeof obj === 'undefined') {
-			return undefined;
-		}
-	}
-	return obj;
 }
 
 class SVGFM {

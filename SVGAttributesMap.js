@@ -1,6 +1,7 @@
 const feAttrs = {
 	in: {
-		value: ['SourceGraphic', 'SourceAlpha', 'BackgroundImage', 'BackgroundAlpha', 'FillPaint', 'StrokePaint', '<filter-primitive-reference>'],
+		value: ['', 'SourceGraphic', 'SourceAlpha', 'BackgroundImage', 'BackgroundAlpha', 'FillPaint', 'StrokePaint', '<filter-primitive-reference>'],
+		labels: ['(previous primitive or SourceGraphic)', undefined, undefined, undefined, undefined, undefined, undefined, undefined],
 		flow: 'in',
 	},
 	result: {
