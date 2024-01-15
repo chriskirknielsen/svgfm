@@ -195,6 +195,10 @@
 	.flow > :is(h1, h2, h3) + * {
 		--flow-space: 0.125em;
 	}
+
+	svg[width='0'][height='0'] {
+		position: absolute;
+	}
 }
 
 @layer app {
@@ -571,6 +575,7 @@
 
 		.app-preview-form-option {
 			display: flex;
+			align-items: center;
 			gap: var(--size-gap);
 		}
 	}
