@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>SVG Filter Maker</title>
+		<link rel="stylesheet" href="./style.css" />
+		<link rel="icon" href="./icon.svg" />
+	</head>
+	<body>
+		<header>
+			<div class="header-toolbar">
+				<button class="button-reset button-ui" type="button" data-app-action="reset" hidden>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="arcs"
+					>
+						<path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38" />
+					</svg>
+					<span>Reset</span>
+				</button>
+
+				<button class="button-reset button-ui" type="button" data-app-action="info:show" hidden>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="arcs"
+					>
+						<circle cx="12" cy="12" r="10"></circle>
+						<line x1="12" y1="16" x2="12" y2="12"></line>
+						<line x1="12" y1="8" x2="12.01" y2="8"></line>
+					</svg>
+					<span>Info</span>
+				</button>
+			</div>
+
+			<h1 class="header-title">
+				<img src="./icon.svg" width="64" height="64" alt="" class="header-icon" />
+				SVGFM
+			</h1>
+
+			<div class="header-credits">made by <a href="https://chriskirknielsen.com">chriskirknielsen</a></div>
+		</header>
+
+		<main id="app"><p>Loading… if this doesn't update, JavaScript may be disabled or the resources failed to load. I'm truly sorry.</p></main>
+		<div id="app-info" class="app-info" tabindex="-1" hidden>
+			<div class="app-info-toolbar">
+				<h2>App information</h2>
+				<button class="button-reset button-toggle app-info-close" type="button" data-app-action="info:hide">
+					<span class="visually-hidden">Close app info window</span>
+					<svg
+						aria-hidden="true"
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="arcs"
+					>
+						<line x1="18" y1="6" x2="6" y2="18"></line>
+						<line x1="6" y1="6" x2="18" y2="18"></line>
+					</svg>
+				</button>
+			</div>
+
+			<div class="app-info-content flow">
+				<p>
+					This app was built from scratch by <a href="https://chriskirknielsen.com/">chriskirknielsen</a> (that's me talking in third person!). I hope it is as useful to
+					you as it is to me! It's free to use, but hey if you want to support me, you could perhaps
+					<a href="https://chriskirknielsen.com/designs/">check out my shirt/sticker designs</a> and maybe buy one if anything catches your eye?
+				</p>
+
+				<hr />
+
+				<h3>Why?</h3>
+				<p>
+					I love SVG so much, but its filters are a little complex to wrap my smooth brain around… so to make it a little easier, here is a tool to dynamically build an
+					SVG filter with a GUI. An SVG Filter Maker, or <strong>SVGFM</strong>, for short…
+				</p>
+
+				<h3>Notes &amp; Instructions</h3>
+				<ul>
+					<li>Drag an output port into an input port to link its value dynamically.</li>
+					<li>Drag a node into the sidebar to remove it (the "Expand" button works as a target if the sidebar is collapsed!).</li>
+					<li>Hold down <kbd>Shift</kbd> to reveal an unlink button between connected ports.</li>
+					<li>When a <code>result</code> node is not plugged into another port, it will act as a "final output".</li>
+					<li>The app is relatively permissive and allows connections that might not be valid (like a standard string into a Graphic <code>in</code> attribute).</li>
+					<li>Color inputs accept named colors, non-hexidecimal formats, and even CSS custom properties, but the preview will not render correctly in most cases.</li>
+					<li>Some circular reference is allowed betwen nodes, but is currently not actively checked against… divide by zero at your own risk.</li>
+					<li>
+						This app will mostly do what you tell it to. This means that there is no real validation to ensure it is valid SVG code, though if the preview is broken,
+						the configuration is likely invalid.
+					</li>
+				</ul>
+
+				<h3>Credits</h3>
+				<p>UI button icons provided by <a href="https://iconsvg.xyz/">iconsvg.xyz</a>.</p>
+			</div>
+		</div>
+
+		<script src="./SVGAttributesMap.js"></script>
+		<script src="./SVGFM.js"></script>
+		<script>
+			const app = new SVGFM('#app', {
+				attrMap: SVGAttributesMap,
+				mathsMap: [
+					{
+						ref: 'mathsArithmetic',
+						label: 'Arithmetic',
+						attrs: {
+							numberA: { attrType: SVGAttributesMap.attrs.number, label: 'Number A', flow: 'in', default: 0 },
+							operation: {
+								attrType: {
+									value: ['+', '-', '*', '/'],
+									labels: ['(+) Add', '(-) Subtract', '(×) Multiply', '(÷) Divide'],
+								},
+								label: 'Operation',
+								default: '+',
+							},
+							numberB: { attrType: SVGAttributesMap.attrs.number, label: 'Number B', flow: 'in', default: 0 },
+							output: { computed: ['numberA', 'numberB'], attrType: SVGAttributesMap.attrs.number, label: 'Result', flow: 'out' },
+						},
+					},
+					{
+						ref: 'mathsClamp',
+						label: 'Clamp',
+						attrs: {
+							min: { attrType: SVGAttributesMap.attrs.number, label: 'Min (leave empty for -∞)', flow: 'in', default: ' ' },
+							number: { attrType: SVGAttributesMap.attrs.number, label: 'Number', flow: 'in', default: 0 },
+							max: { attrType: SVGAttributesMap.attrs.number, label: 'Max (leave empty for +∞)', flow: 'in', default: ' ' },
+							output: { computed: ['min', 'number', 'max'], attrType: SVGAttributesMap.attrs.number, label: 'Result', flow: 'out' },
+						},
+					},
+				],
+				inputsMap: [
+					{
+						ref: 'inputRandom',
+						label: 'Random Number',
+						attrs: {
+							min: { attrType: SVGAttributesMap.attrs.number, label: 'Min', flow: 'in', default: 0 },
+							max: { attrType: SVGAttributesMap.attrs.number, label: 'Max', flow: 'in', default: 1 },
+							precision: { attrType: SVGAttributesMap.attrs.integer, label: 'Decimal Precision', default: 2, max: 16 },
+							output: { computed: true, attrType: SVGAttributesMap.attrs.number, flow: 'out' },
+						},
+					},
+					{ ref: 'inputNumber', label: 'Number Input', attrs: { number: { attrType: SVGAttributesMap.attrs.number, flow: 'out', default: 0 } } },
+					{ ref: 'inputText', label: 'Text Input', attrs: { string: { attrType: SVGAttributesMap.attrs.string, flow: 'out' } } },
+					{ ref: 'inputColor', label: 'Color Input', attrs: { color: { attrType: SVGAttributesMap.attrs.color, flow: 'out', default: '#ff0000' } } },
+				],
+				categoryLabels: {
+					primitives: 'SVG Primitives',
+					maths: 'Maths',
+					inputs: 'Inputs',
+				},
+			});
+
+			// Expose the app info and its button
+			const appInfoWindow = document.getElementById('app-info');
+			const appActionTriggers = Array.from(document.querySelectorAll('[data-app-action][hidden]'));
+			appActionTriggers.forEach((trigger) => (trigger.hidden = false));
+
+			// Add the app info block
+			app.app.append(appInfoWindow);
+
+			function toggleInfoWindow(isOpen) {
+				appInfoWindow.hidden = !isOpen;
+
+				if (isOpen) {
+					appInfoWindow.focus();
+				} else {
+					document.getElementById('app').focus();
+				}
+			}
+
+			// Handle toggling of the app info window
+			document.addEventListener('click', (e) => {
+				const appInfoTrigger = e.target.closest('[data-app-action^="info:"]');
+				if (appInfoTrigger) {
+					const isOpen = appInfoTrigger.getAttribute('data-app-action').split(':')[1] === 'show';
+					toggleInfoWindow(isOpen);
+				}
+
+				const appResetTrigger = e.target.closest('[data-app-action="reset"]');
+				if (appResetTrigger) {
+					toggleInfoWindow(false);
+					setTimeout(() => app.reset(), 1); // Ensures the graph is visible if the Info window was open
+				}
+			});
+			document.addEventListener('keyup', (e) => {
+				if (e.key === 'Escape') {
+					appInfoWindow.hidden = true;
+				}
+			});
+		</script>
+	</body>
+</html>

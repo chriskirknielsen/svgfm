@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <rect width="64" height="64" fill="#180029" stroke-width="0" rx="8" ry="8"/>
+  <g fill="none" stroke="#fff1db">
+    <path stroke-linecap="round" stroke-miterlimit="10" stroke-width="4" d="M26.46 32 22.96 32"/>
+    <path stroke-dasharray="0 0 6.39 6.39" stroke-linecap="round" stroke-miterlimit="10" stroke-width="4" d="M17.02,29.99c-2.12-1.69-3.48-4.3-3.48-7.22h0c0-5.1,4.13-9.23,9.23-9.23h12.39"/>
+    <path stroke-linecap="round" stroke-miterlimit="10" stroke-width="4" d="M38.35 13.54 41.85 13.54"/>
+    <path stroke-linecap="round" stroke-miterlimit="10" stroke-width="4" d="M22.15 50.46 25.65 50.46"/>
+    <path stroke-dasharray="0 0 6.39 6.39" stroke-linecap="round" stroke-miterlimit="10" stroke-width="4" d="M32.05,50.46h9.18c5.1,0,9.23-4.13,9.23-9.23h0c0-4.06-2.63-7.51-6.27-8.75"/>
+    <path stroke-linecap="round" stroke-miterlimit="10" stroke-width="4" d="M41.04 32 37.54 32"/>
+    <rect width="58" height="58" x="3" y="3" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" rx="5" ry="5" transform="rotate(90 32 32)"/>
+  </g>
+  <g fill="none" stroke="#ff66ed">
+    <circle cx="47.38" cy="13.54" r="4.62" stroke-miterlimit="10" stroke-width="3"/>
+    <circle cx="32" cy="32" r="4.62" stroke-miterlimit="10" stroke-width="3"/>
+    <circle cx="16.62" cy="50.46" r="4.62" stroke-miterlimit="10" stroke-width="3"/>
+  </g>
+</svg>
