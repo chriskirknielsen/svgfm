@@ -1,10 +1,3 @@
-/**
- * TODO
- * - Save the graph config so it can be restored (see `this.storedGraph = nodeGraph` inside the `getActiveFilterMarkup` method)
- * - Create a list of recipes that can be loaded into the filter maker
- * - Ensure attributes that are conditionally hidden do not appear in the final code
- */
-
 const svgNS = 'http://www.w3.org/2000/svg'; // I'm lazy
 const fePrimRef = '<filter-primitive-reference>';
 
@@ -846,7 +839,8 @@ class SVGFM {
 				matrixSizeFrom.setAttribute('data-matrix-size-control', linkedGridId);
 			}
 
-			this.buildMatrix(matrixSize, defaultMatrix, linkedGrid);
+			const updatedMatrix = this.buildMatrix(matrixSize, defaultMatrix, linkedGrid);
+			triggerChange(updatedMatrix.querySelector('[data-matrix-input-cell]'));
 		}
 
 		// Adjust conditional fields
@@ -2484,11 +2478,18 @@ class SVGFM {
 						continue;
 					}
 
-					// Ignore nested nodes as a visible attribute, ignore _private attributes, ignore empty attributes
-					if (control !== 'nestedNodes' && !control.startsWith('_') && String(attrValue).length !== 0) {
-						// Attach the value
-						fePrimitive.setAttribute(control, `${attrValue}${valueUnit}`.trim());
+					const isNestedNodes = control === 'nestedNodes';
+					const isPrivateAttr = control.startsWith('_');
+					const isEmptyValue = String(attrValue).length === 0;
+					const isHiddenCondition = controlInput.closest('[data-control-conditions]')?.hidden === true;
+
+					// Ignore nested nodes as a visible attribute, ignore _private attributes, ignore empty attributes, ignore hidden conditional attributes
+					if (isNestedNodes || isPrivateAttr || isEmptyValue || isHiddenCondition) {
+						continue;
 					}
+
+					// Attach the value
+					fePrimitive.setAttribute(control, `${attrValue}${valueUnit}`.trim());
 				}
 			}
 
@@ -2534,17 +2535,19 @@ class SVGFM {
 
 	/** Update the preview by generating the code and refreshing the preview accordingly */
 	updatePreview() {
+		const previewWidth = this.previewWindow.clientWidth;
+		const previewHeight = this.previewWindow.clientHeight;
 		const filterMarkup = this.getActiveFilterMarkup();
 		const filterName = 'svgfm-filter';
 		const filterAttr = filterMarkup ? `filter="url(#${filterName})"` : '';
 		const previewType = this.getPreviewType();
 		const previewEl =
 			previewType === 'image'
-				? `<image href="./sample.jpg" x="50" y="50" width="300" height="150" ${filterAttr} />`
+				? `<image href="./sample.jpg" x="50%" y="50%" width="300" height="150" transform="translate(-150 -75)" ${filterAttr} />`
 				: `<text x="50%" y="50%" text-anchor="middle" ${filterAttr} fill="currentColor" font-size="32">Sample Text Effect</text>`;
 		const filterDef = `<filter id="${filterName}">${filterMarkup}</filter>`;
 
-		const previewCode = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="400" height="250">
+		const previewCode = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${previewWidth} ${previewHeight}" width="400" height="250">
 			<title>A preview of the SVG filter with ${previewType}</title>
 			<defs>${filterDef}</defs>
 			${previewEl}
