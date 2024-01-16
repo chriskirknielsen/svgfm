@@ -42,7 +42,8 @@
 		--color-error: hsl(0, 100%, 67%);
 		--box-glow: 0 2px 12px -4px hsla(275, 67%, 67%, 0.5);
 		--shadow-color: 275, 100%, 40%;
-		--port-connect-lightness: 40%;
+		--port-connect-lightness: 70%;
+		--port-connect-stroke-color: hsl(275, 100%, 8%);
 		--color-custom-input-helper-text: hsl(275, 100%, 80%);
 		--color-custom-input-helper-bg: hsl(275, 100%, 20%);
 
@@ -118,7 +119,7 @@
 		background: var(--color-bg-alt);
 	}
 
-	header > * {
+	header>* {
 		flex: 1 0 0;
 	}
 
@@ -188,11 +189,11 @@
 		padding: 0;
 	}
 
-	.flow > * + * {
+	.flow>*+* {
 		margin-block-start: var(--flow-space, 1em);
 	}
 
-	.flow > :is(h1, h2, h3) + * {
+	.flow> :is(h1, h2, h3)+* {
 		--flow-space: 0.125em;
 	}
 
@@ -244,7 +245,7 @@
 			height: auto;
 		}
 
-		:not(:hover, :focus-within) > .help-link {
+		:not(:hover, :focus-within)>.help-link {
 			opacity: 0.67;
 		}
 
@@ -253,7 +254,7 @@
 			align-items: center;
 		}
 
-		.help-link > svg {
+		.help-link>svg {
 			width: 0.9em;
 			height: auto;
 		}
@@ -333,6 +334,7 @@
 		}
 
 		@media (prefers-reduced-motion: reduce) {
+
 			.app-sidebar,
 			.app-sidebar-inner,
 			.app-sidebar-toggle {
@@ -340,17 +342,17 @@
 			}
 		}
 
-		.app-sidebar-inner > details {
+		.app-sidebar-inner>details {
 			margin-block-start: var(--size-gutter);
 		}
 
-		.app-sidebar-inner > details > summary {
+		.app-sidebar-inner>details>summary {
 			padding-block: var(--size-gap);
 
 			cursor: pointer;
 		}
 
-		.app-sidebar-inner > details[open] > summary::marker {
+		.app-sidebar-inner>details[open]>summary::marker {
 			color: var(--color-text-alt);
 		}
 
@@ -363,7 +365,7 @@
 			gap: var(--size-gap);
 		}
 
-		.app-nodes-item[data-nested] > .app-template-tile {
+		.app-nodes-item[data-nested]>.app-template-tile {
 			margin-inline-start: 2em;
 		}
 	}
@@ -381,7 +383,7 @@
 			font-size: 0.875rem;
 		}
 
-		.app-graph > * {
+		.app-graph>* {
 			position: relative;
 
 			grid-area: 1 / -1;
@@ -431,7 +433,7 @@
 			opacity: 1;
 		}
 
-		.app-graph-lines .app-graph-line-action > .app-graph-line-action-button {
+		.app-graph-lines .app-graph-line-action>.app-graph-line-action-button {
 			stroke: var(--color-border);
 			stroke-width: 2px;
 			fill: var(--color-bg);
@@ -439,7 +441,8 @@
 			pointer-events: auto;
 			cursor: pointer;
 		}
-		.app-graph-lines .app-graph-line-action > .app-graph-line-action-button:hover {
+
+		.app-graph-lines .app-graph-line-action>.app-graph-line-action-button:hover {
 			fill: var(--color-bg);
 		}
 
@@ -566,7 +569,7 @@
 			--sidebar-bg: var(--color-bg-delete);
 		}
 
-		.app-sidebar-inner.is-threatening > details {
+		.app-sidebar-inner.is-threatening>details {
 			visibility: hidden;
 		}
 
@@ -635,6 +638,7 @@
 			.app-node-tile__control-label-unit-item:has(input:checked) {
 				text-decoration: underline;
 			}
+
 			.app-node-tile__control-label-size-control input {
 				width: 4ch;
 				padding: 0;
@@ -667,12 +671,12 @@
 				width: 100%;
 			}
 
-			.app-node-tile__control-label-wrap:hover + .app-node-tile__control,
-			.app-node-tile__control > :not(.compound-input):hover {
+			.app-node-tile__control-label-wrap:hover+.app-node-tile__control,
+			.app-node-tile__control> :not(.compound-input):hover {
 				--color-border: var(--color-border-active);
 			}
 
-			.app-node-tile__control > .compound-input > :is(input:where([type='text'], [type='url'], [type='number']), textarea, select, output, .custom-input):hover {
+			.app-node-tile__control>.compound-input> :is(input:where([type='text'], [type='url'], [type='number']), textarea, select, output, .custom-input):hover {
 				--color-border: var(--color-border-active);
 			}
 
@@ -755,7 +759,7 @@
 				gap: var(--size-gutter);
 				cursor: text;
 
-				& > input[type='text'] {
+				&>input[type='text'] {
 					flex-grow: 1;
 					appearance: none;
 					padding: 0;
@@ -765,7 +769,7 @@
 					outline: none;
 				}
 
-				& > input {
+				&>input {
 					min-height: 0;
 				}
 			}
@@ -779,7 +783,7 @@
 				cursor: default;
 			}
 
-			.custom-input-colorwrap > input[type='color'] {
+			.custom-input-colorwrap>input[type='color'] {
 				width: 3em;
 				height: 1.5em;
 			}
@@ -807,8 +811,8 @@
 				outline-offset: 1px;
 			}
 
-			.custom-input-colorwrap:not([data-invalid-color]) > input[type='color'],
-			.custom-input-colorwrap[data-invalid-color='transparent'] > input[type='color'] {
+			.custom-input-colorwrap:not([data-invalid-color])>input[type='color'],
+			.custom-input-colorwrap[data-invalid-color='transparent']>input[type='color'] {
 				opacity: 0;
 			}
 
@@ -828,35 +832,26 @@
 				background: repeating-conic-gradient(#333 0% 25%, #ccc 0% 50%) 50% / 16px 16px;
 			}
 
-			.custom-input-colorwrap:is([data-invalid-color='transparent' i], [data-invalid-color='currentColor' i], [data-invalid-color='inherit' i]) > input[type='color'] {
+			.custom-input-colorwrap:is([data-invalid-color='transparent' i], [data-invalid-color='currentColor' i], [data-invalid-color='inherit' i])>input[type='color'] {
 				opacity: 0;
 			}
 
 			.custom-input-colorwrap:is([data-invalid-color='currentColor' i], [data-invalid-color='inherit' i])::after {
-				background: linear-gradient(
-							0deg,
-							transparent calc(50% - 1px),
-							var(--color-custom-input-helper-text) 0,
-							var(--color-custom-input-helper-text) calc(50% + 1px),
-							transparent 0
-						)
-						no-repeat 20% 25% / 40% 3px,
-					linear-gradient(
-							0deg,
-							transparent calc(50% - 1px),
-							var(--color-custom-input-helper-text) 0,
-							var(--color-custom-input-helper-text) calc(50% + 1px),
-							transparent 0
-						)
-						no-repeat 50% 50% / 40% 3px,
-					linear-gradient(
-							0deg,
-							transparent calc(50% - 1px),
-							var(--color-custom-input-helper-text) 0,
-							var(--color-custom-input-helper-text) calc(50% + 1px),
-							transparent 0
-						)
-						no-repeat 80% 75% / 40% 3px;
+				background: linear-gradient(0deg,
+						transparent calc(50% - 1px),
+						var(--color-custom-input-helper-text) 0,
+						var(--color-custom-input-helper-text) calc(50% + 1px),
+						transparent 0) no-repeat 20% 25% / 40% 3px,
+					linear-gradient(0deg,
+						transparent calc(50% - 1px),
+						var(--color-custom-input-helper-text) 0,
+						var(--color-custom-input-helper-text) calc(50% + 1px),
+						transparent 0) no-repeat 50% 50% / 40% 3px,
+					linear-gradient(0deg,
+						transparent calc(50% - 1px),
+						var(--color-custom-input-helper-text) 0,
+						var(--color-custom-input-helper-text) calc(50% + 1px),
+						transparent 0) no-repeat 80% 75% / 40% 3px;
 				background-color: var(--color-custom-input-helper-bg);
 			}
 
@@ -890,6 +885,7 @@
 					grid-template-rows: repeat(var(--matrix-grid-y), 1fr);
 					gap: 4px;
 				}
+
 				& [data-matrix-input-cell] {
 					appearance: textfield;
 
@@ -912,12 +908,13 @@
 				margin-block-start: var(--size-gap);
 			}
 
-			.control-options > * {
+			.control-options>* {
 				flex: 1 0 auto;
 			}
 		}
 
 		@layer state {
+
 			[data-from-control][readonly],
 			select[data-from-control][disabled],
 			.custom-input.custom-input--has-readonly {
@@ -979,13 +976,11 @@
 		}
 
 		.app-node-tile__port[data-port-relation='one'][data-port-connected='true'] {
-			background: radial-gradient(
-				circle at 50% 50%,
-				var(--port-connect-color) 33%,
-				var(--color-bg) calc(33% + 0.5px),
-				var(--color-bg) calc(33% + 1.5px),
-				hsl(var(--port-hue, 275), 84%, 50%) calc(33% + 2.5px)
-			);
+			background: radial-gradient(circle at 50% 50%,
+					var(--port-connect-color) 33%,
+					var(--port-connect-stroke-color) calc(33% + 0.5px),
+					var(--port-connect-stroke-color) calc(33% + 1.5px),
+					hsl(var(--port-hue, 275), 84%, 50%) calc(33% + 2.5px));
 		}
 
 		.app-node-tile__port[data-port-relation='many'] {
@@ -999,12 +994,14 @@
 
 		.app-node-tile__port[data-port-relation='many'][data-port-connected='true'] {
 			--port-many-diamond-factor2: calc(var(--port-many-diamond-factor) + 2px);
-			--grad-def: transparent var(--port-many-diamond-factor), var(--color-bg) 0;
+			--grad-def: transparent var(--port-many-diamond-factor), var(--port-connect-stroke-color) 0;
 			--grad-def2: transparent var(--port-many-diamond-factor2), hsl(var(--port-hue, 275), 84%, 50%) 0;
 			background-image:
-				/* Background layer*/ linear-gradient(to top right, var(--grad-def2)), linear-gradient(to bottom right, var(--grad-def2)),
+				/* Background layer*/
+				linear-gradient(to top right, var(--grad-def2)), linear-gradient(to bottom right, var(--grad-def2)),
 				linear-gradient(to bottom left, var(--grad-def2)), linear-gradient(to top left, var(--grad-def2)),
-				/* Diamond Stroke */ linear-gradient(to top right, var(--grad-def)), linear-gradient(to bottom right, var(--grad-def)),
+				/* Diamond Stroke */
+				linear-gradient(to top right, var(--grad-def)), linear-gradient(to bottom right, var(--grad-def)),
 				linear-gradient(to bottom left, var(--grad-def)), linear-gradient(to top left, var(--grad-def));
 			background-color: var(--port-connect-color);
 		}
