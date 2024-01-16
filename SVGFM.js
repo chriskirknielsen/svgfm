@@ -474,8 +474,14 @@ class SVGFM {
 			this.colorList.append(el('option', { value: color }));
 		}
 		this.app.append(this.colorList);
-		const questionIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0"><defs><symbol id="icon-question" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="arcs"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></g></symbol></defs></svg>`;
-		let temp = el('div', { innerHTML: questionIconSvg });
+		const uiSvgIcons = `<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
+			<defs>
+				<symbol id="icon-question" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="arcs"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></g></symbol>
+				<symbol id="icon-eye" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="arcs"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></g></symbol>
+				<symbol id="icon-close" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="arcs"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></g></symbol></symbol>
+			</defs>
+		</svg>`;
+		let temp = el('div', { innerHTML: uiSvgIcons });
 		this.app.append(temp.firstChild);
 		temp.remove();
 		temp = undefined;
@@ -772,6 +778,21 @@ class SVGFM {
 				if (attrUnitOptions.primitives.includes(nodeType)) {
 					this.createUnitController({ controlField: controlField, label: labelWrap, input: controlInput, form: form }, attrUnitOptions);
 				}
+			}
+
+			// Add a preview button if there is a Result attribute
+			if (attr === 'result') {
+				const nodePreviewTrigger = el('button', {
+					type: 'button',
+					className: 'app-node-tile__preview-button',
+					draggable: true,
+					innerHTML: `<svg width="12" height="12" aria-hidden="true">
+						<use href="#icon-eye" class="app-node-tile__preview-icon app-node-tile__preview-icon--when-hidden" />
+						<use href="#icon-close" class="app-node-tile__preview-icon app-node-tile__preview-icon--when-shown" />
+					</svg>
+					<span class="visually-hidden">Preview filter at this step</span>`,
+				});
+				labelWrap.append(nodePreviewTrigger);
 			}
 
 			controlWrap.setAttribute('data-control-attr', attr);
@@ -1731,7 +1752,7 @@ class SVGFM {
 		switch (e.type) {
 			case 'dragstart': {
 				// For any drag started on an input, bail
-				if (e.target.closest(this.inputSelectorList)) {
+				if (e.target.closest(this.inputSelectorList) || e.target.closest('.app-node-tile__preview-button')) {
 					e.preventDefault();
 					e.stopPropagation(); // Prevents the parent from receiving the drag event
 					return;
@@ -1784,7 +1805,10 @@ class SVGFM {
 
 			case 'dragend': {
 				let targetType;
-				if ((target = e.target.closest('[data-port-type]'))) {
+				if (e.target.closest('.app-node-tile__preview-button')) {
+					target = null;
+					targetType = null;
+				} else if ((target = e.target.closest('[data-port-type]'))) {
 					targetType = 'port';
 					e.dataTransfer.dropEffect = 'copy';
 				} else if ((target = e.target.closest('.app-template-tile'))) {
@@ -2246,6 +2270,7 @@ class SVGFM {
 			}
 
 			case 'click': {
+				let clearPreviews = true;
 				if ((target = e.target.closest('.app-graph-line-action'))) {
 					e.preventDefault(); // These are SVG links, clicking with Shift pressed would open in a new tab
 					this.graphLines.classList.remove('is-shifted');
@@ -2257,6 +2282,22 @@ class SVGFM {
 
 					this.unlinkPort(lineInputPort, lineOutputControlId);
 					this.render();
+				} else if ((target = e.target.closest('.app-node-tile__preview-button'))) {
+					// Get the associated filter ref
+					const previewRef = target.closest('.app-node-tile__form')?.querySelector('[name="_node-ref"]')?.value;
+
+					// If the tile doesn't have a preview inserted, clear existing previews and create a new one for the required ref
+					if (previewRef && !target.closest('.app-node-tile').querySelector('.app-node-tile__preview-image')) {
+						// We don't want to clear this preview so we'll flag that, and manually remove previews first
+						this.clearAtStepPreviews();
+						clearPreviews = false;
+
+						const previewAtRef = this.getActiveFilterMarkup(previewRef);
+						const previewAtRefMarkup = this.computePreviewMarkup(previewAtRef, { name: `filter-at-step-${previewRef}`, width: 400, height: 250 });
+						const previewWrap = el('div', { innerHTML: previewAtRefMarkup.previewCode, className: 'app-node-tile__preview-image' });
+						target.closest('.app-node-tile').append(previewWrap);
+						target.setAttribute('data-preview-open', true);
+					}
 				} else if ((target = e.target.closest('[data-create-from-template]'))) {
 					const templateRef = target.getAttribute('data-create-from-template');
 					const subNodeTemplate = this.sidebarInner.querySelector(`.app-nodes-item > [data-node-ref="${templateRef}"]`);
@@ -2264,6 +2305,7 @@ class SVGFM {
 					this.nodeFromTemplate(subNodeTemplate);
 				} else if ((target = e.target.closest('.custom-input'))) {
 					if (e.target.closest('input')) {
+						this.clearAtStepPreviews();
 						return;
 					}
 					target.querySelector('input[type="text"]')?.focus();
@@ -2278,6 +2320,10 @@ class SVGFM {
 					} else {
 						this.sidebarDetails.forEach((d) => (d.open = newExpandState));
 					}
+				}
+
+				if (clearPreviews) {
+					this.clearAtStepPreviews();
 				}
 				break;
 			}
@@ -2399,7 +2445,7 @@ class SVGFM {
 		// TODO
 	}
 
-	getActiveFilterMarkup() {
+	getActiveFilterMarkup(stopAtRef = null) {
 		// We'll create our filter primitives in a temporary `svg > filter` DOM structure
 		const tempSvgEl = el('svg', {}, 'svg');
 		const tempFilterEl = el('filter', {}, 'svg');
@@ -2432,8 +2478,12 @@ class SVGFM {
 			.reverse();
 
 		const feMap = {};
+		let skipNodes = false;
 
 		filtersSortedFirstToLast.forEach((filter) => {
+			if (skipNodes) {
+				return;
+			}
 			const nodeForm = filter.nodeElement.querySelector('.app-node-tile__form');
 			const nodeFormData = getFormData(nodeForm);
 			const fePrimitive = el(filter.nodeData.ref, {}, 'svg');
@@ -2500,6 +2550,10 @@ class SVGFM {
 				isNested: Array.isArray(filter.nodeData.nested) && filter.nodeData.nested.length > 0,
 				result: result,
 			};
+
+			if (stopAtRef && stopAtRef === nodeFormData['_node-ref']) {
+				skipNodes = true;
+			}
 		});
 
 		for (let feItem in feMap) {
@@ -2533,12 +2587,10 @@ class SVGFM {
 		return markup;
 	}
 
-	/** Update the preview by generating the code and refreshing the preview accordingly */
-	updatePreview() {
-		const previewWidth = this.previewWindow.clientWidth;
-		const previewHeight = this.previewWindow.clientHeight;
-		const filterMarkup = this.getActiveFilterMarkup();
-		const filterName = 'svgfm-filter';
+	computePreviewMarkup(filterMarkup, filterOptions = {}) {
+		const filterName = filterOptions.name || 'svgfm-filter';
+		const previewWidth = filterOptions.width || 300;
+		const previewHeight = filterOptions.height || 150;
 		const filterAttr = filterMarkup ? `filter="url(#${filterName})"` : '';
 		const previewType = this.getPreviewType();
 		const previewEl =
@@ -2547,11 +2599,30 @@ class SVGFM {
 				: `<text x="50%" y="50%" text-anchor="middle" ${filterAttr} fill="currentColor" font-size="32">Sample Text Effect</text>`;
 		const filterDef = `<filter id="${filterName}">${filterMarkup}</filter>`;
 
-		const previewCode = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${previewWidth} ${previewHeight}" width="400" height="250">
+		const previewCode = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${previewWidth} ${previewHeight}" width="${previewWidth}" height="${previewHeight}">
 			<title>A preview of the SVG filter with ${previewType}</title>
 			<defs>${filterDef}</defs>
 			${previewEl}
 		</svg>`;
+
+		return { filterDef, previewCode };
+	}
+
+	clearAtStepPreviews() {
+		// Clear out existing mini at-step previews
+		Array.from(this.graph.querySelectorAll('.app-node-tile__preview-button[data-preview-open]')).forEach((btn) => btn.removeAttribute('data-preview-open'));
+		Array.from(this.graph.querySelectorAll('.app-node-tile__preview-image')).forEach((prev) => prev.remove());
+	}
+
+	/** Update the preview by generating the code and refreshing the preview accordingly */
+	updatePreview() {
+		this.clearAtStepPreviews();
+		const filterMarkup = this.getActiveFilterMarkup();
+		const previewWidth = this.previewWindow.clientWidth;
+		const previewHeight = this.previewWindow.clientHeight;
+		const previewMarkup = this.computePreviewMarkup(filterMarkup, { width: previewWidth, height: previewHeight });
+		const filterDef = previewMarkup.filterDef;
+		const previewCode = previewMarkup.previewCode;
 
 		const defCode = `<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0"><defs>${filterDef}</defs></svg>`;
 		const defDOM = el('div', { innerHTML: defCode });
@@ -2559,6 +2630,7 @@ class SVGFM {
 
 		this.previewCode.innerHTML = defDOM.innerHTML.trim();
 		this.previewWindow.innerHTML = previewCode;
+		defDOM.remove(); // We've used its innerHTML, it can be discarded
 	}
 
 	reset() {
