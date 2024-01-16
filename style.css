@@ -131,6 +131,9 @@
 
 		text-align: center;
 		line-height: 1;
+		font-weight: 900;
+		font-stretch: 87.5%;
+		letter-spacing: 0.05em;
 	}
 
 	.header-icon {
