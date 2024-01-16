@@ -420,6 +420,7 @@
 		}
 
 		.app-graph-line {
+			fill: none;
 			stroke: var(--port-connect-color);
 			stroke-width: calc(1px * var(--strokeWidth));
 			stroke-linecap: round;

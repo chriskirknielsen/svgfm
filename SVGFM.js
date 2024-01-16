@@ -1523,6 +1523,7 @@ class SVGFM {
 					y2: outputPortPos.y + strokeWidth / 2 + outputPortCenter.y - graphOffset.y,
 				};
 				const buttonSize = 20;
+				const pathCurveControlPointDistance = Math.min(Math.abs(linePoints.y2 - linePoints.y1), Math.abs(linePoints.x2 - linePoints.x1));
 
 				const lineLink = el(
 					'a',
@@ -1536,12 +1537,16 @@ class SVGFM {
 				);
 
 				const lineEl = el(
-					'line',
+					'path',
 					{
-						x1: linePoints.x1,
-						y1: linePoints.y1,
-						x2: linePoints.x2,
-						y2: linePoints.y2,
+						// x1: linePoints.x1,
+						// y1: linePoints.y1,
+						// x2: linePoints.x2,
+						// y2: linePoints.y2,
+						d: `M ${linePoints.x1} ${linePoints.y1}
+							C ${linePoints.x1 - pathCurveControlPointDistance} ${linePoints.y1},
+							${linePoints.x2 + pathCurveControlPointDistance} ${linePoints.y2},
+							${linePoints.x2} ${linePoints.y2}`,
 						class: `app-graph-line app-graph-line--${portType}`,
 					},
 					'svg'
