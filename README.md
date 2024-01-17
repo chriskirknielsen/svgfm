@@ -1,6 +1,6 @@
 # SVGFM
 
-SVG Filter Maker is a tool to help you build out your SVG filters viasually in a node graph editor.
+SVG Filter Maker is a tool to help you build out your SVG filters visually in a node graph editor.
 
 ## Known issues
 
