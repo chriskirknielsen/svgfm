@@ -212,7 +212,7 @@
 
 			display: grid;
 			grid-template-columns: auto 1fr;
-			grid-template-rows: 1fr clamp(8rem, 25%, 16rem);
+			grid-template-rows: 1fr auto;
 			height: 0;
 			min-height: 100%;
 
@@ -1099,14 +1099,18 @@
 
 		@layer preview {
 			.app-preview {
+				position: relative;
 				z-index: 2;
 				grid-column: 1 / -1;
 				grid-row: 2;
 				display: grid;
 				grid-template-areas: '--code --config';
-				grid-template-columns: min(66%, 60rem) 1fr;
+				grid-template-columns: auto 1fr;
 				grid-template-rows: 1fr;
 				gap: var(--size-gutter);
+				min-height: 8rem;
+				height: clamp(8rem, 20vh, 16rem);
+				max-height: 50vh;
 				padding: var(--size-gutter);
 
 				border-block-start: 1px solid var(--color-border);
@@ -1115,9 +1119,12 @@
 
 			.app-preview-code {
 				grid-area: --code;
-				scrollbar-color: var(--scrollbar-colors);
-				resize: none;
+				min-width: 20vw;
+				width: min(66vw, 60rem);
+				max-width: 80vw;
+				resize: horizontal;
 				tab-size: 2;
+				scrollbar-color: var(--scrollbar-colors);
 			}
 
 			.app-preview-config {
@@ -1155,6 +1162,51 @@
 				display: flex;
 				align-items: center;
 				gap: var(--size-gap);
+			}
+
+			.app-preview-resizer {
+				--resizer-inner-line: var(--color-border-active);
+				--resizer-inner-bg: var(--color-bg);
+
+				position: absolute;
+				z-index: 10;
+				inset: -1px 0 auto;
+
+				height: 3px;
+
+				cursor: row-resize;
+
+				&.is-resizing {
+					--resizer-inner-bg: var(--color-border-active);
+				}
+
+				&:hover {
+					--resizer-inner-line: var(--color-text-alt);
+				}
+
+				&:hover::before {
+					content: '';
+
+					position: absolute;
+
+					inset: 1px 0;
+					background: var(--color-border-active);
+				}
+
+				&::after {
+					content: '';
+
+					position: absolute;
+					inset: -2px 0;
+
+					display: block;
+					width: 2rem;
+					margin: auto;
+
+					border: 1px solid var(--color-border-active);
+					border-radius: 1rem;
+					background: linear-gradient(var(--resizer-inner-line), var(--resizer-inner-line)) no-repeat 50% 50% / 50% 1px var(--resizer-inner-bg);
+				}
 			}
 		}
 	}

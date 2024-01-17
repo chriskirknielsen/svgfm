@@ -523,6 +523,9 @@ class SVGFM {
 			});
 		});
 
+		// Add the preview resizer
+		this.preview.append(el('div', { className: 'app-preview-resizer', draggable: true }));
+
 		// Populate the preview form
 		this.previewForm = el('form', { ariaLabel: 'Preview', className: 'app-preview-form' });
 		const previewFormLegend = el('legend', { innerText: 'Source Graphic:', className: 'font-bold' });
@@ -1766,10 +1769,14 @@ class SVGFM {
 				let targetType;
 				let targetData = {};
 
-				if ((target = e.target.closest('[data-port-type]'))) {
+				if ((target = e.target.closest('.app-preview-resizer'))) {
+					targetType = 'resizer';
+					targetData.info = { type: targetType, handle: target, startHeight: this.preview.clientHeight };
+					targetData.effect = 'none';
+				} else if ((target = e.target.closest('[data-port-type]'))) {
 					// Connect two ports
 					targetType = 'port';
-					targetData.info = { type: 'port', node: target.closest('.app-node-tile').id, ref: target.getAttribute('data-port-link') };
+					targetData.info = { type: targetType, node: target.closest('.app-node-tile').id, ref: target.getAttribute('data-port-link') };
 					targetData.effect = 'copy';
 				} else if ((target = e.target.closest('.app-template-tile'))) {
 					// Clone a template
@@ -1784,13 +1791,19 @@ class SVGFM {
 				}
 
 				// If the target is valid, calculate its "drag and drop" transfer data
-				if (target && ['node', 'port'].includes(targetType)) {
+				if (targetType === 'resizer') {
+					const targetOffset = getClickOffset(e, target);
+					targetData.info.position = { x: target.offsetLeft, y: target.offsetTop };
+					targetData.info.offset = targetOffset;
+					target.classList.add('is-resizing');
+					this.dataTransfer = targetData.info;
+				} else if (target && ['node', 'port'].includes(targetType)) {
 					const targetOffset = getClickOffset(e, target);
 					target.classList.add('is-dragged');
 					e.dataTransfer.effectAllowed = targetData.effect;
 					e.dataTransfer.dropEffect = targetData.effect;
 					targetData.info.position = { x: target.offsetLeft, y: target.offsetTop };
-					targetData.info.offset = { x: targetOffset.x, y: targetOffset.y };
+					targetData.info.offset = targetOffset;
 					this.dataTransfer = targetData.info;
 
 					if (targetType === 'node') {
@@ -1805,12 +1818,19 @@ class SVGFM {
 					e.preventDefault();
 				}
 
+				if (targetData.effect) {
+					e.dataTransfer.dropEffect = targetData.effect;
+				}
+
 				break;
 			}
 
 			case 'dragend': {
 				let targetType;
-				if (e.target.closest('.app-node-tile__preview-button')) {
+				if ((target = e.target.closest('.app-preview-resizer'))) {
+					targetType = 'resizer';
+					e.dataTransfer.dropEffect = 'none';
+				} else if (e.target.closest('.app-node-tile__preview-button')) {
 					target = null;
 					targetType = null;
 				} else if ((target = e.target.closest('[data-port-type]'))) {
@@ -1831,13 +1851,20 @@ class SVGFM {
 					if (targetType === 'node') {
 						target.style.opacity = '';
 					}
+
+					if (targetType === 'resizer') {
+						target.classList.remove('is-resizing');
+					}
 				}
 
 				const data = this.dataTransfer;
 				const offset = data.offset;
 				const originalPosition = data.position;
 
-				if (targetType === 'node') {
+				if (targetType === 'resizer') {
+					const targetHeight = document.body.clientHeight - e.clientY;
+					this.preview.style.height = `${targetHeight}px`;
+				} else if (targetType === 'node') {
 					let nodeTile = target;
 
 					if (this.dropTarget) {
@@ -1925,16 +1952,23 @@ class SVGFM {
 					return;
 				}
 
+				const data = this.dataTransfer;
+
+				if (data && data && data.type === 'resizer') {
+					const targetHeight = document.body.clientHeight - e.clientY;
+					this.preview.style.height = `${targetHeight}px`;
+					e.preventDefault();
+					return;
+				}
+
 				if ((target = e.target.closest('.app-node-tile__port'))) {
 					e.preventDefault();
-					const data = this.dataTransfer;
 
 					if (data.type === 'port') {
 						target.classList.add('is-attempt');
 					}
 				} else if ((target = e.target.closest('[data-dropzone]'))) {
 					e.preventDefault();
-					const data = this.dataTransfer;
 					const offset = data.offset;
 
 					if (data.type === 'tile') {
@@ -1954,9 +1988,15 @@ class SVGFM {
 					return;
 				}
 
+				const data = this.dataTransfer;
+
+				if (data && data.info && data.info.type === 'resizer') {
+					e.preventDefault();
+					return;
+				}
+
 				if ((target = e.target.closest('.app-node-tile__port'))) {
 					e.preventDefault();
-					const data = this.dataTransfer;
 					if (data.type === 'port') {
 						// Remove the attempt highlight if it is not the dragged port
 						if (target.getAttribute('data-port-link') !== data.ref) {
@@ -1965,7 +2005,6 @@ class SVGFM {
 					}
 				} else if ((target = e.target.closest('[data-dropzone]'))) {
 					e.preventDefault();
-					const data = this.dataTransfer;
 					const offset = data.offset;
 
 					if (data.type === 'tile') {
@@ -2625,7 +2664,7 @@ class SVGFM {
 		const filterMarkup = this.getActiveFilterMarkup();
 		const previewWidth = this.previewWindow.clientWidth;
 		const previewHeight = this.previewWindow.clientHeight;
-		const previewMarkup = this.computePreviewMarkup(filterMarkup, { width: previewWidth, height: previewHeight });
+		const previewMarkup = this.computePreviewMarkup(filterMarkup, { width: 400, height: 250 });
 		const filterDef = previewMarkup.filterDef;
 		const previewCode = previewMarkup.previewCode;
 
