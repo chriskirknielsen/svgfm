@@ -582,7 +582,7 @@ class SVGFM {
 
 	/**
 	 * Assigns the value of the localStorage item with the provided key. Clears the item if the value is undefined.
-	 * @param {*} value The value of the dataTransfer.
+	 * @param {*} value The value of the localStorage item.
 	 */
 	updateLocalStorage(key, value) {
 		if (value === undefined) {
@@ -1799,6 +1799,7 @@ class SVGFM {
 				if (targetType === 'resizer') {
 					const targetOffset = getClickOffset(e, target);
 					targetData.info.position = { x: e.clientX, y: e.clientY };
+					targetData.info.lastPosition = {};
 					targetData.info.offset = targetOffset;
 					target.classList.add('is-resizing');
 					this.dataTransfer = targetData.info;
@@ -1808,6 +1809,7 @@ class SVGFM {
 					e.dataTransfer.effectAllowed = targetData.effect;
 					e.dataTransfer.dropEffect = targetData.effect;
 					targetData.info.position = { x: target.offsetLeft, y: target.offsetTop };
+					targetData.info.lastPosition = {};
 					targetData.info.offset = targetOffset;
 					this.dataTransfer = targetData.info;
 
@@ -1821,6 +1823,7 @@ class SVGFM {
 					}
 				} else {
 					e.preventDefault();
+					return;
 				}
 
 				if (targetData.effect) {
@@ -1865,6 +1868,7 @@ class SVGFM {
 				const data = this.dataTransfer;
 				const offset = data.offset;
 				const originalPosition = data.position;
+				const lastPos = data.lastPosition || { x: e.clientX, y: e.clientY };
 
 				if (targetType === 'resizer') {
 					// Logic is handled in the dragover/dragenter event
@@ -1885,13 +1889,13 @@ class SVGFM {
 							if (data.type === 'template') {
 								nodeTile = this.addNodeTile({
 									ref: data.ref,
-									x: e.clientX - offset.x + this.dropTarget.scrollLeft,
-									y: e.clientY - offset.y + this.dropTarget.scrollTop,
+									x: lastPos.x - offset.x + this.dropTarget.scrollLeft,
+									y: lastPos.y - offset.y + this.dropTarget.scrollTop,
 								});
 								this.graph.append(nodeTile);
 							} else if (data.type === 'tile') {
 								nodeTile = target;
-								this.repositionNodeTile(nodeTile, e.clientX - offset.x, e.clientY - offset.y);
+								this.repositionNodeTile(nodeTile, lastPos.x - offset.x, lastPos.y - offset.y);
 							}
 						}
 					} else {
@@ -1956,6 +1960,7 @@ class SVGFM {
 					return;
 				}
 
+				this.dataTransfer = Object.assign({}, this.dataTransfer, { lastPosition: { x: e.clientX, y: e.clientY } });
 				const data = this.dataTransfer;
 
 				if (data && data && data.type === 'resizer') {
@@ -1992,6 +1997,7 @@ class SVGFM {
 					return;
 				}
 
+				this.dataTransfer = Object.assign({}, this.dataTransfer, { lastPosition: { x: e.clientX, y: e.clientY } });
 				const data = this.dataTransfer;
 
 				if (data && data.info && data.info.type === 'resizer') {
@@ -2025,9 +2031,9 @@ class SVGFM {
 			}
 
 			case 'drag': {
-				if (this.dataTransfer && this.dataTransfer.type === 'resizer') {
-					this.dataTransfer.lastPosition = { x: e.clientX, y: e.clientY };
-				} else if ((target = e.target.closest('[data-dropzone]'))) {
+				this.dataTransfer = Object.assign({}, this.dataTransfer, { lastPosition: { x: e.clientX, y: e.clientY } });
+
+				if ((target = e.target.closest('[data-dropzone]'))) {
 					this.drawPortLinks();
 				}
 				break;
