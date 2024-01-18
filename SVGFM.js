@@ -409,7 +409,7 @@ class SVGFM {
 		this.sidebar = el('div', { className: 'app-sidebar' });
 		this.sidebarInner = el('div', { className: 'app-sidebar-inner', id: 'app-sidebar-inner' });
 		this.graph = el('div', { className: 'app-graph' });
-		this.graphLines = el('svg', { class: 'app-graph-lines', xmlns: svgNS }, 'svg');
+		this.graphLines = el('svg', { class: 'app-graph-lines', xmlns: svgNS, 'aria-hidden': 'true' }, 'svg');
 		this.graph.append(this.graphLines);
 		this.preview = el('div', { className: 'app-preview' });
 		this.previewCode = el('textarea', { readOnly: true, className: 'app-preview-code', id: 'app-preview-code' });
@@ -474,7 +474,7 @@ class SVGFM {
 			this.colorList.append(el('option', { value: color }));
 		}
 		this.app.append(this.colorList);
-		const uiSvgIcons = `<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
+		const uiSvgIcons = `<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true">
 			<defs>
 				<symbol id="icon-question" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="arcs"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></g></symbol>
 				<symbol id="icon-eye" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="arcs"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></g></symbol>
@@ -514,6 +514,7 @@ class SVGFM {
 				const nodeTile = this.addTemplateTile();
 				listItem.hidden = nodeNested; // Hide the item if it's only used as a nested item
 				nodeTile.setAttribute('data-node-ref', node.ref);
+				nodeTile.setAttribute('aria-roledescription', `Draggable template node for ${node.ref}`);
 				Object.assign(this.elData(nodeTile), { nodeRef: node.ref, nodeCategory: cat.ref, nested: node.nested });
 
 				// Append the node template to the list
@@ -608,7 +609,7 @@ class SVGFM {
 
 	/** Create a standard Template Tile which can be dragged from the Sidebar into the Graph */
 	addTemplateTile() {
-		const templateTile = el('div', { className: 'app-tile app-template-tile', draggable: true, tabIndex: 0 });
+		const templateTile = el('div', { className: 'app-tile app-template-tile', draggable: true, tabIndex: '0', role: 'button' });
 		templateTile.setAttribute('data-element', 'template');
 		this.elData(templateTile).tileType = 'template';
 		return templateTile;
@@ -2337,9 +2338,9 @@ class SVGFM {
 
 					// If the tile doesn't have a preview inserted, clear existing previews and create a new one for the required ref
 					if (previewRef && !target.closest('.app-node-tile').querySelector('.app-node-tile__preview-image')) {
-						// We don't want to clear this preview so we'll flag that, and manually remove previews first
-						this.clearAtStepPreviews();
+						// We don't want to clear this new preview so we'll flag that, and manually remove previews first
 						clearPreviews = false;
+						this.clearAtStepPreviews();
 
 						const previewAtRef = this.getActiveFilterMarkup(previewRef);
 						const previewAtRefMarkup = this.computePreviewMarkup(previewAtRef, { name: `filter-at-step-${previewRef}`, width: 400, height: 250 });

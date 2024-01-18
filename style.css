@@ -544,6 +544,12 @@
 			font-weight: bold;
 		}
 
+		.app-template-tile {
+			width: 100%;
+
+			text-align: start;
+		}
+
 		.app-template-tile:hover {
 			--color-border: var(--color-text);
 		}
