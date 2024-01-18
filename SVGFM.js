@@ -2347,8 +2347,21 @@ class SVGFM {
 						// We don't want to clear this new preview so we'll flag that, and manually remove previews first
 						clearPreviews = false;
 						this.clearAtStepPreviews();
+						// Get the current node and its dependencies
+						const node = this.getNodeFromElement(target);
+						const nodeGraph = this.getNodeGraphFromLeaves([node]);
+						let nodeDependencyList = [];
 
-						const previewAtRef = this.getActiveFilterMarkup(previewRef);
+						// Recursively loop over the dependencies and build a flat list
+						function getFlatDependencies(nodes) {
+							for (let ref in nodes) {
+								nodeDependencyList.push(ref);
+								getFlatDependencies(nodes[ref].dependsOn);
+							}
+						}
+						getFlatDependencies(nodeGraph);
+
+						const previewAtRef = this.getActiveFilterMarkup(nodeDependencyList);
 						const previewAtRefMarkup = this.computePreviewMarkup(previewAtRef, { name: `filter-at-step-${previewRef}`, width: 400, height: 250 });
 						const previewWrap = el('div', { innerHTML: previewAtRefMarkup.previewCode, className: 'app-node-tile__preview-image' });
 						target.closest('.app-node-tile').append(previewWrap);
@@ -2453,8 +2466,8 @@ class SVGFM {
 		}
 	}
 
-	/** Create a cyclical */
-	getNodeGraphFromLeaves(leafNodes, leafIndexRef = 1) {
+	/** Create a recursive way to find how each node is connected */
+	getNodeGraphFromLeaves(leafNodes, leafIndexRef = 1, mutate = true) {
 		// Find nodes that have no outgoing data from their result control
 		let graph = {};
 
@@ -2469,7 +2482,7 @@ class SVGFM {
 
 			graph[nodeRef] = {
 				node: leafNode,
-				dependsOn: this.getNodeGraphFromLeaves(nodeInList, leafIndexRef + 1),
+				dependsOn: this.getNodeGraphFromLeaves(nodeInList, leafIndexRef + 1, mutate),
 			};
 		});
 
@@ -2501,7 +2514,7 @@ class SVGFM {
 		// TODO
 	}
 
-	getActiveFilterMarkup(stopAtRef = null) {
+	getActiveFilterMarkup(refsToFilter = null) {
 		// We'll create our filter primitives in a temporary `svg > filter` DOM structure
 		const tempSvgEl = el('svg', {}, 'svg');
 		const tempFilterEl = el('filter', {}, 'svg');
@@ -2537,14 +2550,15 @@ class SVGFM {
 		let skipNodes = false;
 
 		filtersSortedFirstToLast.forEach((filter) => {
-			if (skipNodes) {
-				return;
-			}
 			const nodeForm = filter.nodeElement.querySelector('.app-node-tile__form');
 			const nodeFormData = getFormData(nodeForm);
 			const fePrimitive = el(filter.nodeData.ref, {}, 'svg');
 			const controls = filter.controls;
 			let result;
+
+			if (refsToFilter && Array.isArray(refsToFilter) && !refsToFilter.includes(nodeFormData['_node-ref'])) {
+				return;
+			}
 
 			for (let control in controls) {
 				const controlEl = controls[control];
@@ -2606,10 +2620,6 @@ class SVGFM {
 				isNested: Array.isArray(filter.nodeData.nested) && filter.nodeData.nested.length > 0,
 				result: result,
 			};
-
-			if (stopAtRef && stopAtRef === nodeFormData['_node-ref']) {
-				skipNodes = true;
-			}
 		});
 
 		for (let feItem in feMap) {
