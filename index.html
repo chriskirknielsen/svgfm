@@ -195,7 +195,9 @@
 			app.app.append(appInfoWindow);
 
 			function toggleInfoWindow(isOpen) {
+				const appSections = Array.from(document.querySelectorAll('.app-sidebar, .app-graph, .app-preview'));
 				appInfoWindow.hidden = !isOpen;
+				appSections.forEach((section) => (section.inert = isOpen));
 
 				if (isOpen) {
 					appInfoWindow.focus();
