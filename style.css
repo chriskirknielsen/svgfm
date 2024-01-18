@@ -1170,18 +1170,19 @@
 
 				position: absolute;
 				z-index: 10;
-				inset: -1px 0 auto;
+				inset: -2px 0 auto;
 
 				height: 3px;
 
 				cursor: row-resize;
 
-				&.is-resizing {
-					--resizer-inner-bg: var(--color-border-active);
-				}
-
 				&:hover {
 					--resizer-inner-line: var(--color-text-alt);
+				}
+
+				&.is-resizing {
+					--resizer-inner-line: var(--color-bg);
+					--resizer-inner-bg: var(--color-border-active);
 				}
 
 				&:hover::before {

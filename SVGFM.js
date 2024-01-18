@@ -1773,6 +1773,10 @@ class SVGFM {
 					targetType = 'resizer';
 					targetData.info = { type: targetType, handle: target, startHeight: this.preview.clientHeight };
 					targetData.effect = 'none';
+
+					const img = new Image();
+					img.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='; // Transparent pixel
+					e.dataTransfer.setDragImage(img, 1, 1);
 				} else if ((target = e.target.closest('[data-port-type]'))) {
 					// Connect two ports
 					targetType = 'port';
@@ -1793,7 +1797,7 @@ class SVGFM {
 				// If the target is valid, calculate its "drag and drop" transfer data
 				if (targetType === 'resizer') {
 					const targetOffset = getClickOffset(e, target);
-					targetData.info.position = { x: target.offsetLeft, y: target.offsetTop };
+					targetData.info.position = { x: e.clientX, y: e.clientY };
 					targetData.info.offset = targetOffset;
 					target.classList.add('is-resizing');
 					this.dataTransfer = targetData.info;
@@ -1862,8 +1866,7 @@ class SVGFM {
 				const originalPosition = data.position;
 
 				if (targetType === 'resizer') {
-					const targetHeight = document.body.clientHeight - e.clientY;
-					this.preview.style.height = `${targetHeight}px`;
+					// Logic is handled in the dragover/dragenter event
 				} else if (targetType === 'node') {
 					let nodeTile = target;
 
@@ -2021,7 +2024,9 @@ class SVGFM {
 			}
 
 			case 'drag': {
-				if ((target = e.target.closest('[data-dropzone]'))) {
+				if (this.dataTransfer && this.dataTransfer.type === 'resizer') {
+					this.dataTransfer.lastPosition = { x: e.clientX, y: e.clientY };
+				} else if ((target = e.target.closest('[data-dropzone]'))) {
 					this.drawPortLinks();
 				}
 				break;
