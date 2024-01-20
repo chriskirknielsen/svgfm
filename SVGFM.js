@@ -543,7 +543,7 @@ class SVGFM {
 		previewFormLabelText.append(previewFormOptionText, previewFormSpanText);
 		previewFormLabelCustom.append(previewFormOptionCustom, previewFormSpanCustom);
 		this.previewForm.append(previewFormLegend, previewFormLabelImage, previewFormLabelText /*previewFormLabelCustom*/);
-		this.previewWindow = el('div', { className: 'app-preview-window' });
+		this.previewWindow = el('div', { className: 'app-preview-window preview-box' });
 		this.previewConfig.append(this.previewForm, this.previewWindow);
 
 		this.sidebarInner.setAttribute('data-dropzone', 'delete'); // Dropping into sidebar will delete a node
@@ -2350,20 +2350,13 @@ class SVGFM {
 						// Get the current node and its dependencies
 						const node = this.getNodeFromElement(target);
 						const nodeGraph = this.getNodeGraphFromLeaves([node]);
-						let nodeDependencyList = [];
 
 						// Recursively loop over the dependencies and build a flat list
-						function getFlatDependencies(nodes) {
-							for (let ref in nodes) {
-								nodeDependencyList.push(ref);
-								getFlatDependencies(nodes[ref].dependsOn);
-							}
-						}
-						getFlatDependencies(nodeGraph);
+						let nodeDependencyList = this.getFlatDependencies(nodeGraph);
 
 						const previewAtRef = this.getActiveFilterMarkup(nodeDependencyList);
 						const previewAtRefMarkup = this.computePreviewMarkup(previewAtRef, { name: `filter-at-step-${previewRef}`, width: 400, height: 250 });
-						const previewWrap = el('div', { innerHTML: previewAtRefMarkup.previewCode, className: 'app-node-tile__preview-image' });
+						const previewWrap = el('div', { innerHTML: previewAtRefMarkup.previewCode, className: 'app-node-tile__preview-image preview-box' });
 						target.closest('.app-node-tile').append(previewWrap);
 						target.setAttribute('data-preview-open', true);
 					}
@@ -2388,6 +2381,10 @@ class SVGFM {
 						setTimeout(() => this.sidebarDetails.forEach((d) => (d.open = newExpandState)), transitionDuration);
 					} else {
 						this.sidebarDetails.forEach((d) => (d.open = newExpandState));
+					}
+				} else if ((target = e.target.closest('.app-node-tile'))) {
+					if (e.shiftKey) {
+						target.classList.toggle('is-selected');
 					}
 				}
 
@@ -2487,6 +2484,15 @@ class SVGFM {
 		});
 
 		return graph;
+	}
+
+	getFlatDependencies(nodes) {
+		let currList = [];
+		for (let ref in nodes) {
+			currList.push(ref);
+			currList.push(this.getFlatDependencies(nodes[ref].dependsOn));
+		}
+		return currList.flat(Infinity);
 	}
 
 	nodeObjToJSON(nodeObj) {
