@@ -644,6 +644,7 @@ class SVGFM {
 
 		// Position the node
 		this.repositionNodeTile(node, config.x, config.y);
+
 		return node;
 	}
 
@@ -836,7 +837,6 @@ class SVGFM {
 			form.append(controlWrap);
 			controls[attr] = controlField;
 			attrsFlat.push(attr);
-			// this.elData(form).controls[attr] = controlField;
 		}
 
 		this.activeNodes[nodeData.uniqueRef] = {
@@ -859,7 +859,7 @@ class SVGFM {
 			// In case one control affects more than one field, ensure the IDs are listed instead of replaced
 			if (matrixSizeFrom.hasAttribute('data-matrix-size-control')) {
 				const currGridList = matrixSizeFrom.getAttribute('data-matrix-size-control').split(',');
-				matrixSizeFrom.setAttribute('data-matrix-size-control', [linkedGridId].concat(currGridList));
+				matrixSizeFrom.setAttribute('data-matrix-size-control', ArrayUnique([linkedGridId].concat(currGridList)).join(','));
 			} else {
 				matrixSizeFrom.setAttribute('data-matrix-size-control', linkedGridId);
 			}
@@ -1260,6 +1260,13 @@ class SVGFM {
 
 	toggleConditionalControl(control, isVisible) {
 		control.closest('[data-control-conditions]').hidden = !isVisible;
+	}
+
+	/** Trigger the `change` event on all conditional controls to ensure the default value is accurante */
+	triggerAllConditionalControls(nodeForm) {
+		Array.from(nodeForm.querySelectorAll('[data-control-conditions]')).forEach((control) => {
+			triggerChange(control);
+		});
 	}
 
 	/** Adjust the position of a Node Tile */
@@ -1729,6 +1736,8 @@ class SVGFM {
 		let nodeTile = this.addNodeTile({ ref: data.ref, x: position.x, y: position.y });
 		this.graph.append(nodeTile);
 
+		this.triggerAllConditionalControls(this.elData(nodeTile).form);
+
 		this.render();
 
 		return nodeTile;
@@ -1893,6 +1902,7 @@ class SVGFM {
 									y: lastPos.y - offset.y + this.dropTarget.scrollTop,
 								});
 								this.graph.append(nodeTile);
+								this.triggerAllConditionalControls(this.elData(nodeTile).form);
 							} else if (data.type === 'tile') {
 								nodeTile = target;
 								this.repositionNodeTile(nodeTile, lastPos.x - offset.x, lastPos.y - offset.y);
