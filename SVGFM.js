@@ -2440,9 +2440,10 @@ class SVGFM {
 						this.render();
 					}
 				} else if ((target = document.activeElement.closest('.app-template-tile'))) {
-					if (e.key === 'Enter') {
+					if (['Enter', ' '].includes(e.key)) {
 						const newNode = this.nodeFromTemplate(target);
 						newNode.focus();
+						e.preventDefault(); // For the space key, don't scroll
 					}
 				}
 				break;
