@@ -541,7 +541,7 @@ class SVGFM {
 		const previewFormInputCustom = el('input', { type: 'text', placeholder: 'e.g. <svg ...', name: 'filter-preview-custom-value', ariaLabel: 'Custom SVG Code' });
 		previewFormLabelImage.append(previewFormOptionImage, previewFormSpanImage);
 		previewFormLabelText.append(previewFormOptionText, previewFormSpanText);
-		previewFormLabelCustom.append(previewFormOptionCustom, previewFormInputCustom);
+		previewFormLabelCustom.append(previewFormOptionCustom, document.createTextNode('Code'), previewFormInputCustom);
 		this.previewForm.append(previewFormLegend, previewFormLabelImage, previewFormLabelText, previewFormLabelCustom);
 		this.previewWindow = el('div', { className: 'app-preview-window preview-box' });
 		this.previewConfig.append(this.previewForm, this.previewWindow);
