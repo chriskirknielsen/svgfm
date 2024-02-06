@@ -538,11 +538,11 @@ class SVGFM {
 		const previewFormOptionCustom = el('input', { type: 'radio', name: 'filter-preview-type', value: 'custom', id: 'filter-preview-custom' });
 		const previewFormSpanImage = el('span', { innerText: 'Image' });
 		const previewFormSpanText = el('span', { innerText: 'Text' });
-		const previewFormSpanCustom = el('span', { innerText: 'Custom Code' });
+		const previewFormInputCustom = el('input', { type: 'text', placeholder: 'e.g. <svg ...', name: 'filter-preview-custom-value', ariaLabel: 'Custom SVG Code' });
 		previewFormLabelImage.append(previewFormOptionImage, previewFormSpanImage);
 		previewFormLabelText.append(previewFormOptionText, previewFormSpanText);
-		previewFormLabelCustom.append(previewFormOptionCustom, previewFormSpanCustom);
-		this.previewForm.append(previewFormLegend, previewFormLabelImage, previewFormLabelText /*previewFormLabelCustom*/);
+		previewFormLabelCustom.append(previewFormOptionCustom, previewFormInputCustom);
+		this.previewForm.append(previewFormLegend, previewFormLabelImage, previewFormLabelText, previewFormLabelCustom);
 		this.previewWindow = el('div', { className: 'app-preview-window preview-box' });
 		this.previewConfig.append(this.previewForm, this.previewWindow);
 
@@ -942,7 +942,7 @@ class SVGFM {
 				if (attrComputed) {
 					controlInput = el('output', { innerText: '0' });
 				} else {
-					controlInput = el('input', { type: 'number', name: attr, draggable: true });
+					controlInput = el('input', { type: 'number', name: attr, draggable: true, autocomplete: 'off' });
 
 					// Adjust number input attributes
 					if (valueType === '<integer>') {
@@ -1157,7 +1157,14 @@ class SVGFM {
 
 		for (let y = 0; y < sizeY; y++) {
 			for (let x = 0; x < sizeX; x++) {
-				const cellInput = el('input', { type: 'number', draggable: true, step: 0.1, placeholder: '0', ariaLabel: `Matrix value at X=${x + 1} and Y=${y + 1}` });
+				const cellInput = el('input', {
+					type: 'number',
+					autocomplete: 'off',
+					draggable: true,
+					step: 0.1,
+					placeholder: '0',
+					ariaLabel: `Matrix value at X=${x + 1} and Y=${y + 1}`,
+				});
 
 				if (fill && fill.hasOwnProperty(y) && fill[y].hasOwnProperty(x)) {
 					cellInput.value = fill[y][x];
@@ -1636,6 +1643,12 @@ class SVGFM {
 		return type;
 	}
 
+	getCustomCode() {
+		const customCodeInput = this.previewForm.querySelector('[name="filter-preview-custom-value"]');
+		const customCodeValue = (customCodeInput.value || '').trim();
+		return customCodeValue;
+	}
+
 	getNodeFromElement(element) {
 		const nodeTile = element.closest('.app-node-tile');
 		const nodeRef = nodeTile.id;
@@ -2067,7 +2080,12 @@ class SVGFM {
 			}
 
 			case 'focusin': {
-				if ((target = e.target.closest('textarea'))) {
+				if ((target = e.target.closest('[name="filter-preview-custom-value"]'))) {
+					// Automatically select the radio when the input is focused
+					const customCodeRadio = target.closest('label').querySelector('input[type="radio"]');
+					customCodeRadio.checked = true;
+					triggerChange(customCodeRadio);
+				} else if ((target = e.target.closest('textarea'))) {
 					if (target !== this.previewCode) {
 						return;
 					}
@@ -2676,10 +2694,22 @@ class SVGFM {
 		const previewHeight = filterOptions.height || 150;
 		const filterAttr = filterMarkup ? `filter="url(#${filterName})"` : '';
 		const previewType = this.getPreviewType();
-		const previewEl =
-			previewType === 'image'
-				? `<image href="./sample.jpg" x="50%" y="50%" width="300" height="150" transform="translate(-150 -75)" ${filterAttr} />`
-				: `<text x="50%" y="50%" text-anchor="middle" ${filterAttr} fill="currentColor" font-size="32">Sample Text Effect</text>`;
+		let previewEl;
+		switch (previewType) {
+			case 'text':
+				previewEl = `<text x="50%" y="50%" text-anchor="middle" ${filterAttr} fill="currentColor" font-size="32">Sample Text Effect</text>`;
+				break;
+			case 'custom':
+				previewEl = this.getCustomCode();
+				if (previewEl) {
+					previewEl = `<g ${filterAttr}>${previewEl}</g>`;
+					break; // If there''s no code, use the next option
+				}
+			default:
+			case 'image':
+				previewEl = `<image href="./sample.jpg" x="50%" y="50%" width="300" height="150" transform="translate(-150 -75)" ${filterAttr} />`;
+				break;
+		}
 		const filterDef = `<filter id="${filterName}">${filterMarkup}</filter>`;
 
 		const previewCode = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${previewWidth} ${previewHeight}" width="${previewWidth}" height="${previewHeight}">

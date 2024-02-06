@@ -1163,6 +1163,7 @@
 			.app-preview-form {
 				display: flex;
 				gap: var(--size-gutter);
+				align-items: baseline;
 			}
 
 			.app-preview-window {
