@@ -2582,7 +2582,6 @@ class SVGFM {
 			.reverse();
 
 		const feMap = {};
-		let skipNodes = false;
 
 		filtersSortedFirstToLast.forEach((filter) => {
 			const nodeForm = filter.nodeElement.querySelector('.app-node-tile__form');
