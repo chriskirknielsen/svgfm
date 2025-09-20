@@ -2556,11 +2556,9 @@ class SVGFM {
 		tempSvgEl.append(tempFilterEl);
 
 		// Grab all the nodes that are a filter primitive
-		const activeFilters = Object.entries(this.activeNodes)
-			.map(([ref, info]) => info)
-			.filter((info) => {
-				return info.nodeData.category === 'primitives';
-			});
+		const activeFilters = Object.values(this.activeNodes).filter((info) => {
+			return info.nodeData.category === 'primitives';
+		});
 
 		// Find the end-of-tree nodes to start the backwards graph building
 		const leafNodes = activeFilters.filter((f) => {
