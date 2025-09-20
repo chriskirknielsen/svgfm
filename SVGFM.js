@@ -2667,6 +2667,7 @@ class SVGFM {
 					if (feData.primitive === 'feMerge' && feMap[childFeId].primitive !== 'feMergeNode' && feMap[childFeId].result) {
 						feEl.append(el('feMergeNode', { in: feMap[childFeId].result }, 'svg'));
 						tempFilterEl.append(feEl); // Place the feMerge node after the referenced node
+						feEl.before(feMap[childFeId].element); // Force the referenced node to be before the parent
 					} else {
 						feEl.append(feMap[childFeId].element);
 					}
