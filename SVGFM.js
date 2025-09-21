@@ -840,7 +840,7 @@ class SVGFM {
 				for (let subInput of subControls.children) {
 					const subInputData = this.elData(subInput);
 					const subAttrConfig = subInputData.attrConfig;
-					if (subAttrConfig.flow) {
+					if (subAttrConfig?.flow) {
 						this.addFlowPorts(controlField, subInput.id, subAttrConfig.flow, {
 							valueType: valueType,
 							type: globalType,
