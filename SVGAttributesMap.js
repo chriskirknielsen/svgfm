@@ -39,16 +39,20 @@ const feAttrs = {
 				label: 'X',
 				attrType: {
 					value: '<number-positive>',
+					flowRelation: 'one',
 				},
 				required: true,
 				default: '0',
+				flow: 'in',
 			},
 			_optionalNumber: {
 				label: 'Y',
 				attrType: {
 					value: '<number-positive>',
+					flowRelation: 'one',
 				},
 				default: '',
+				flow: 'in',
 			},
 		},
 	},

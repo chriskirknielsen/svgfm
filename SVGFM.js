@@ -832,6 +832,18 @@ class SVGFM {
 						controlField.append(subControls);
 					}
 				}
+
+				for (let subInput of subControls.children) {
+					const subInputData = this.elData(subInput);
+					const subAttrConfig = subInputData.attrConfig;
+					if (subAttrConfig.flow) {
+						this.addFlowPorts(controlField, subInput.id, subAttrConfig.flow, {
+							valueType: valueType,
+							type: globalType,
+							relation: subAttrConfig.attrType.flowRelation,
+						});
+					}
+				}
 			}
 
 			form.append(controlWrap);
@@ -1021,7 +1033,7 @@ class SVGFM {
 			}
 			case '<number-optional-number>':
 			case '<custom:compound-value>': {
-				globalType = 'string';
+				globalType = valueType === '<number-optional-number>' ? 'number' : 'string';
 				controlInput = el('input', { name: attr, draggable: true, type: 'hidden' });
 				subControls = el('div', { className: 'compound-input' });
 				subControlsLocation = ['inner', 'after'];
@@ -1049,6 +1061,7 @@ class SVGFM {
 
 					subAttrInput.setAttribute('aria-label', subAttr);
 					subAttrInput.setAttribute('data-compound-part-for', controlGuid);
+					subAttrInput.setAttribute('data-port-type', subAttrControl.globalType);
 
 					subControls.append(subAttrAppendable);
 					subControlIdList.push(subAttrControl.controlGuid);
@@ -1327,8 +1340,14 @@ class SVGFM {
 	}
 
 	setInputValueFromControls(inputControl, count) {
-		const word = this.elData(inputControl).attrConfig.word || 'node';
-		const plural = this.elData(inputControl).attrConfig.plural || `${word}s`;
+		const inputData = this.elData(inputControl);
+		const isNumericInput = inputData.attrConfig.attrType.value === '<number-positive>';
+		if (isNumericInput) {
+			return; // Leave number as-is
+		}
+
+		const word = inputData.attrConfig.word || 'node';
+		const plural = inputData.attrConfig.plural || `${word}s`;
 
 		inputControl.value = `(${count} ${count !== 1 ? plural : word})`;
 	}
@@ -2250,7 +2269,19 @@ class SVGFM {
 						}
 					}
 
-					if (!canChangedInputReceiveValue && !isHiddenCompoundInput) {
+					// Check if the input is a compound part with a source value sent to it via a port control
+					const isCompoundPartWithReceivingPort = changedInput.readOnly && changedInput.matches('[data-compound-part-for][data-from-control]');
+
+					if (isCompoundPartWithReceivingPort) {
+						// Replicate the logic for the changedInput.matches('[data-compound-part-for]') case below...
+						const compoundReceiverId = changedInput.getAttribute('data-compound-part-for');
+						const compoundReceiver = document.getElementById(compoundReceiverId);
+						compoundReceiver.value = this.getCompoundValue(compoundReceiverId);
+
+						// ...but skip the triggering of an event to avoid an infinite loop of parent and child inputs triggering events on each other
+					}
+
+					if (isCompoundPartWithReceivingPort || (!canChangedInputReceiveValue && !isHiddenCompoundInput)) {
 						e.preventDefault();
 						return;
 					}
