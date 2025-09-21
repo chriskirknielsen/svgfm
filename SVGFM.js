@@ -2701,6 +2701,7 @@ class SVGFM {
 		for (let feItem in feMap) {
 			const feData = feMap[feItem];
 			const feEl = feData.element;
+			const moveOperation = [];
 
 			if (Array.isArray(feData.children) && feData.children.length > 0) {
 				for (let childId of feData.children) {
@@ -2711,9 +2712,23 @@ class SVGFM {
 					if (feData.primitive === 'feMerge' && feMap[childFeId].primitive !== 'feMergeNode' && feMap[childFeId].result) {
 						feEl.append(el('feMergeNode', { in: feMap[childFeId].result }, 'svg'));
 						tempFilterEl.append(feEl); // Place the feMerge node after the referenced node
-						feEl.before(feMap[childFeId].element); // Force the referenced node to be before the parent
+						// moveOperation.push(() => feEl.before(feMap[childFeId].element)); // Force the referenced node to be before the parent
 					} else {
 						feEl.append(feMap[childFeId].element);
+					}
+				}
+			} else {
+				// Check if the node is a referenced child of some other node
+				const controlNode = this.getNodeFromElement(document.getElementById(feItem));
+				const resultControl = controlNode?.controls?.result?.querySelector?.('[name="result"][data-primitive-ref][data-control-type="<filter-primitive-reference>"]');
+				if (resultControl) {
+					const controlId = resultControl.id;
+					const referencingNodes = Object.values(feMap).filter((feData) => Array.isArray(feData.children) && feData.children.includes(controlId));
+					referencingNodes.sort((a, b) => {
+						return Array.from(tempFilterEl.children).indexOf(a) - Array.from(tempFilterEl.children).indexOf(b);
+					});
+					if (referencingNodes.length > 0) {
+						moveOperation.push(() => referencingNodes[0].element.before(feEl)); // Moves the node to be before the reference "parent" node
 					}
 				}
 			}
@@ -2721,6 +2736,7 @@ class SVGFM {
 			if (!feData.isNested) {
 				tempFilterEl.append(feEl);
 			}
+			moveOperation.forEach((op) => op());
 		}
 
 		// Grab the HTML, and remove the temporary DOM holding the markup
