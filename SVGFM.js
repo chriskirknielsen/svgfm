@@ -798,6 +798,10 @@ class SVGFM {
 					<span class="visually-hidden">Preview filter at this step</span>`,
 				});
 				labelWrap.append(nodePreviewTrigger);
+			} else if (attr === 'output' && nodeData.ref === 'inputRandom') {
+				const regenerateButton = el('button', { type: 'button', className: 'button-reset button-ui', textContent: 'new value' });
+				regenerateButton.setAttribute('data-random-renew-for', controlInput.id);
+				labelWrap.append(regenerateButton);
 			}
 
 			controlWrap.setAttribute('data-control-attr', attr);
@@ -899,6 +903,7 @@ class SVGFM {
 		const attrConditions = attrConfig.conditions || null;
 		const controlGuid = generateId('control');
 		const valueType = Array.isArray(attrData.value) ? '<custom:select>' : attrData.value;
+		const nodeRef = this.elData(node).nodeRef;
 		let controlInput;
 		let globalType;
 		let subControls;
@@ -2397,6 +2402,14 @@ class SVGFM {
 
 					this.unlinkPort(lineInputPort, lineOutputControlId);
 					this.render();
+				} else if ((target = e.target.closest('[data-random-renew-for'))) {
+					// Find the output element that needs to be regenerated
+					const randomOutput = document.getElementById(target.getAttribute('data-random-renew-for'));
+					if (randomOutput) {
+						// Find any input that will trigger the output to recalculate
+						const randomInputField = this.elData(randomOutput).form.querySelector('input[data-control-type]');
+						triggerChange(randomInputField); // A change event, even if the value doesn't change, does the trick
+					}
 				} else if ((target = e.target.closest('.app-node-tile__preview-button'))) {
 					// Get the associated filter ref
 					const previewRef = target.closest('.app-node-tile__form')?.querySelector('[name="_node-ref"]')?.value;

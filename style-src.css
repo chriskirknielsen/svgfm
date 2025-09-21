@@ -1083,6 +1083,11 @@
 				inset-inline-end: 100%;
 
 				border-inline-end-width: 0;
+
+				/* Special case where more than one port exists due to compound inputs (could be made way better with sibling-count and -index) */
+				.compound-input + & + & {
+					inset-inline-end: calc((100% - var(--size-gutter)) / 2);
+				}
 			}
 
 			.app-node-tile__port[data-port-direction='out'] {

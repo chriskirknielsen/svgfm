@@ -17,5 +17,12 @@ SVG Filter Maker is a tool to help you build out your SVG filters visually in a 
 
 ## Community ideas
 
-- Added: [Eric Meyer](https://mastodon.social/@Meyerweb/111766970639600432) suggested it would make sense to be able to resize the preview section.
-- Added: [Scott Kellum](https://typetura.social/@scott/111761480249714868) suggested the ability to preview the rendering of a filter at a specific node.
+-   Added: [Eric Meyer](https://mastodon.social/@Meyerweb/111766970639600432) suggested it would make sense to be able to resize the preview section.
+-   Added: [Scott Kellum](https://typetura.social/@scott/111761480249714868) suggested the ability to preview the rendering of a filter at a specific node.
+
+## Change log
+
+-   2025-01-15: Added node preview
+-   2024-01-17: Added resizing
+-   2025-09-20: Allow ports on some compound fields like Blur X and Y
+-   2025-09-20: Allow random number to be re-generated with a single click instead of needing to edit an input back and forth

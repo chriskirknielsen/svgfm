@@ -291,6 +291,7 @@
 			border: 1px solid var(--color-border);
 			border-radius: var(--radius-big);
 			background: color-mix(in hsl, var(--sidebar-bg), transparent 75%);
+			-webkit-backdrop-filter: blur(4px);
 			backdrop-filter: blur(4px);
 			box-shadow: var(--box-glow);
 			scrollbar-color: var(--scrollbar-colors);
@@ -373,7 +374,10 @@
 			cursor: pointer;
 		}
 
-		.app-sidebar-inner > details:not([open]) > summary:is(:hover, :focus)::marker,
+		.app-sidebar-inner > details:not([open]) > summary:is(:hover, :focus)::marker {
+			color: var(--color-text-alt);
+		}
+
 		.app-sidebar-inner > details[open] > summary::marker {
 			color: var(--color-text-alt);
 		}
@@ -492,6 +496,7 @@
 			gap: var(--size-gutter);
 			padding: var(--size-gutter);
 			background: color-mix(in hsl, var(--color-bg), transparent 25%);
+			-webkit-backdrop-filter: blur(8px) grayscale();
 			backdrop-filter: blur(8px) grayscale();
 			flex-direction: column;
 			display: flex;
@@ -614,6 +619,7 @@
 		@layer drag-actions {
 			[draggable='true']:not(input:where([type='text'], [type='url'], [type='number']), textarea, select, output, .custom-input) {
 				cursor: grab;
+				-webkit-user-select: none;
 				user-select: none;
 			}
 
@@ -1023,6 +1029,10 @@
 			.app-node-tile__port[data-port-direction='in'] {
 				border-inline-end-width: 0;
 				inset-inline-end: 100%;
+			}
+
+			.compound-input + .app-node-tile__port[data-port-direction='in'] + .app-node-tile__port[data-port-direction='in'] {
+				inset-inline-end: calc((100% - var(--size-gutter)) / 2);
 			}
 
 			.app-node-tile__port[data-port-direction='out'] {
